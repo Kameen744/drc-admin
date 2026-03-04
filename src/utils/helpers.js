@@ -1,0 +1,35 @@
+import { format } from 'date-fns'
+
+export function formatDate(dateString) {
+  if (!dateString) return 'N/A'
+  return format(new Date(dateString), 'dd/MM/yyyy')
+}
+
+export function formatArray(arr) {
+  if (!arr) return []
+
+  // If it's already an array, return it
+  if (Array.isArray(arr)) return arr
+
+  // If it's a string, split by comma and trim whitespace
+  if (typeof arr === 'string') {
+    return arr.split(',').map(item => item.trim()).filter(Boolean)
+  }
+
+  return []
+}
+
+export function getRelationName(relation) {
+  if (Array.isArray(relation)) {
+    return relation.map(r => r?.name).filter(Boolean).join(', ') || 'N/A'
+  }
+  return relation?.name || 'N/A'
+}
+
+export function getBadgeClass(status) {
+  return status ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+}
+
+export function getStatusText(status) {
+  return status ? 'Approved' : 'Pending'
+}
