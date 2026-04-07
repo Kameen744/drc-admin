@@ -4,7 +4,7 @@ import Table from "@/components/UI/Table.vue";
 import FilterDropdown from "@/components/UI/FilterDropdown.vue";
 import Button from "@/components/UI/Button.vue";
 import Badge from "@/components/UI/Badge.vue";
-import { formatDate, getBadgeClass, getStatusText } from "@/utils/helpers";
+import { formatDate, getBadgeClass, getStatusText, extractFromArray } from "@/utils/helpers";
 import { usePocketBase } from "@/composables/usePocketBase";
 
 const props = defineProps({
@@ -83,7 +83,7 @@ const columns = [
 
 const stateOptions = computed(() => {
     const uniqueStates = [
-        ...new Set(props.records.map((r) => r.state_name).filter(Boolean)),
+        ...new Set(props.records.flatMap((r) => r.state_names || []).filter(Boolean)),
     ];
     return [
         { value: "", label: "All States" },
@@ -93,10 +93,7 @@ const stateOptions = computed(() => {
 
 const lgaOptions = computed(() => {
     const allLGAs = props.records
-        .map((r) =>
-            r.lga_names ? r.lga_names.split(",").map((l) => l.trim()) : [],
-        )
-        .flat()
+        .flatMap((r) => extractFromArray(r.lga_data, "lga"))
         .filter(Boolean);
     const uniqueLGAs = [...new Set(allLGAs)];
     return [
@@ -205,11 +202,11 @@ const hasActiveFilters = computed(() => {
             <template #stateName="{ row }">
                 <span class="inline-flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full bg-blue-400"></span>
-                    {{ row.state_name || "N/A" }}
+                    {{ (row.state_names || []).join(", ") || "N/A" }}
                 </span>
             </template>
             <template #lgaName="{ row }">
-                <span class="text-gray-600">{{ row.lga_names || "N/A" }}</span>
+                <span class="text-gray-600">{{ extractFromArray(row.lga_data, "lga").join(", ") || "N/A" }}</span>
             </template>
             <template #Start_date_of_support="{ row }">
                 <span class="text-gray-700">{{ formatDate(row.Start_date_of_support) }}</span>

@@ -19,6 +19,13 @@ export function formatArray(arr) {
   return []
 }
 
+// Extract values from an array of objects by key
+// e.g. extractFromArray([{lga: "Gwadabawa"}, {lga: "Michika"}], "lga") => ["Gwadabawa", "Michika"]
+export function extractFromArray(arr, key) {
+  if (!arr || !Array.isArray(arr)) return []
+  return arr.map(item => item?.[key]).filter(Boolean)
+}
+
 export function getRelationName(relation) {
   if (Array.isArray(relation)) {
     return relation.map(r => r?.name).filter(Boolean).join(', ') || 'N/A'

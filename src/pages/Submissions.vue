@@ -36,7 +36,7 @@ const stats = computed(() => {
     const total = records.value.length || 0;
     const approved = records.value.filter(r => r.approve).length || 0;
     const pending = total - approved;
-    const uniqueStates = new Set(records.value.map(r => r.state_name).filter(Boolean)).size;
+    const uniqueStates = new Set(records.value.flatMap(r => r.state_names || []).filter(Boolean)).size;
 
     return {
         total,
@@ -62,11 +62,11 @@ function buildFilter() {
     }
 
     if (filters.value.state) {
-        filterParts.push(`state_name = "${filters.value.state}"`);
+        filterParts.push(`state_names ~ "${filters.value.state}"`);
     }
 
     if (filters.value.lga) {
-        filterParts.push(`lga_names ~ "${filters.value.lga}"`);
+        filterParts.push(`lga_data.lga ~ "${filters.value.lga}"`);
     }
 
     if (filters.value.approval !== "") {

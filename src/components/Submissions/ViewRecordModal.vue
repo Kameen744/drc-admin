@@ -2,7 +2,7 @@
 import { ref, watch } from "vue";
 import { usePocketBase } from "@/composables/usePocketBase";
 import { useToast } from "@/composables/useToast";
-import { formatDate, formatArray } from "@/utils/helpers";
+import { formatDate, formatArray, extractFromArray } from "@/utils/helpers";
 import Modal from "@/components/UI/Modal.vue";
 import Button from "@/components/UI/Button.vue";
 import Badge from "@/components/UI/Badge.vue";
@@ -323,11 +323,22 @@ function handleClose() {
                         <div class="space-y-1">
                             <label
                                 class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >State</label
+                                >State(s)</label
                             >
-                            <p class="font-medium text-gray-900">
-                                {{ record.state_name || "N/A" }}
-                            </p>
+                            <div class="flex flex-wrap gap-1.5 mt-1">
+                                <span
+                                    v-for="(state, index) in (record.state_names || [])"
+                                    :key="index"
+                                    class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-sm font-medium border border-blue-100"
+                                >
+                                    {{ state }}
+                                </span>
+                                <span
+                                    v-if="!record.state_names || record.state_names.length === 0"
+                                    class="text-gray-400"
+                                    >N/A</span
+                                >
+                            </div>
                         </div>
                         <div class="space-y-1">
                             <label
@@ -336,8 +347,8 @@ function handleClose() {
                             >
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(lga, index) in formatArray(
-                                        record.lga_names,
+                                    v-for="(lga, index) in extractFromArray(
+                                        record.lga_data, 'lga',
                                     )"
                                     :key="index"
                                     class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-sm font-medium border border-blue-100"
@@ -346,8 +357,8 @@ function handleClose() {
                                 </span>
                                 <span
                                     v-if="
-                                        !record.lga_names ||
-                                        record.lga_names.length === 0
+                                        !record.lga_data ||
+                                        record.lga_data.length === 0
                                     "
                                     class="text-gray-400"
                                     >N/A</span
@@ -361,8 +372,8 @@ function handleClose() {
                             >
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(ward, index) in formatArray(
-                                        record.ward_names,
+                                    v-for="(ward, index) in extractFromArray(
+                                        record.ward_data, 'ward',
                                     )"
                                     :key="index"
                                     class="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md text-sm font-medium border border-indigo-100"
@@ -371,8 +382,8 @@ function handleClose() {
                                 </span>
                                 <span
                                     v-if="
-                                        !record.ward_names ||
-                                        record.ward_names.length === 0
+                                        !record.ward_data ||
+                                        record.ward_data.length === 0
                                     "
                                     class="text-gray-400"
                                     >N/A</span
@@ -386,8 +397,8 @@ function handleClose() {
                             >
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(facility, index) in formatArray(
-                                        record.facility_names,
+                                    v-for="(facility, index) in extractFromArray(
+                                        record.facility_data, 'facility',
                                     )"
                                     :key="index"
                                     class="px-2.5 py-1 bg-teal-50 text-teal-700 rounded-md text-sm font-medium border border-teal-100"
@@ -396,8 +407,8 @@ function handleClose() {
                                 </span>
                                 <span
                                     v-if="
-                                        !record.facility_names ||
-                                        record.facility_names.length === 0
+                                        !record.facility_data ||
+                                        record.facility_data.length === 0
                                     "
                                     class="text-gray-400"
                                     >N/A</span
