@@ -8,6 +8,18 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!token.value)
 
+  const isSuperAdmin = computed(() => user.value?.role === 'super_admin')
+  const isStateAdmin = computed(() => user.value?.role === 'state_admin')
+
+  // For state_admin: resolve the assigned state name from the relation
+  const assignedState = computed(() => {
+    if (!user.value?.state_assignment) return null
+    // PocketBase expand returns the full relation object
+    const sa = user.value.state_assignment
+    if (typeof sa === 'object' && sa !== null) return sa.name || sa.state_name || sa.id
+    return sa
+  })
+
   function setAuth(userData) {
     user.value = userData.record
     token.value = userData.token
@@ -36,7 +48,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(email, password) {
     try {
-      const authData = await pb.collection('users').authWithPassword(email, password)
+      const authData = await pb.collection('users').authWithPassword(email, password, {
+        expand: 'state_assignment'
+      })
       setAuth(authData)
       return { success: true }
     } catch (error) {
@@ -53,6 +67,9 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     token,
     isAuthenticated,
+    isSuperAdmin,
+    isStateAdmin,
+    assignedState,
     setAuth,
     clearAuth,
     loadFromStorage,

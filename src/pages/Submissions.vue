@@ -5,6 +5,11 @@ import ViewRecordModal from "@/components/Submissions/ViewRecordModal.vue";
 import Card from "@/components/UI/Card.vue";
 import Button from "@/components/UI/Button.vue";
 import { usePocketBase } from "@/composables/usePocketBase";
+import { useAuthStore } from "@/stores/auth";
+import { storeToRefs } from "pinia";
+
+const authStore = useAuthStore();
+const { isStateAdmin, assignedState } = storeToRefs(authStore);
 
 const { fetchRecords } = usePocketBase();
 
@@ -29,6 +34,14 @@ const filters = ref({
     approval: "",
     sortColumn: "",
     sortDirection: "asc",
+});
+
+// Auto-apply state filter for state admins
+const lockedState = computed(() => {
+    if (isStateAdmin.value && assignedState.value) {
+        return assignedState.value;
+    }
+    return "";
 });
 
 // Stats
@@ -161,6 +174,14 @@ onMounted(async () => {
             </p>
         </div>
 
+        <!-- State Admin Notice -->
+        <div v-if="lockedState" class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center gap-3">
+            <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-sm text-blue-700">Viewing submissions for <strong>{{ lockedState }}</strong> only</span>
+        </div>
+
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card variant="elevated" padding="md" class="hover:scale-[1.02] transition-transform duration-200">
@@ -248,6 +269,7 @@ onMounted(async () => {
                 :records="records"
                 :loading="loading"
                 :pagination="pagination"
+                :locked-state="lockedState"
                 @view="handleViewRecord"
                 @page-change="handlePageChange"
                 @per-page-change="handlePerPageChange"

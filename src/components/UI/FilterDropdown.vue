@@ -22,6 +22,10 @@ const props = defineProps({
     type: String,
     default: 'md',
     validator: (value) => ['sm', 'md', 'lg'].includes(value)
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -61,9 +65,11 @@ function selectOption(value) {
     <label class="block text-sm font-medium text-secondary mb-1.5">{{ label }}</label>
     <div class="relative">
       <button
-        @click="isOpen = !isOpen"
+        @click="!disabled && (isOpen = !isOpen)"
         type="button"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary bg-white text-left flex items-center justify-between transition-all hover:border-primary/50"
+        :disabled="disabled"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary bg-white text-left flex items-center justify-between transition-all"
+        :class="disabled ? 'opacity-50 cursor-not-allowed bg-gray-100' : 'hover:border-primary/50'"
       >
         <span class="truncate">{{ displayValue }}</span>
         <svg

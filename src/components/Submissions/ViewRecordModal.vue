@@ -1,8 +1,10 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, reactive } from "vue";
 import { usePocketBase } from "@/composables/usePocketBase";
 import { useToast } from "@/composables/useToast";
 import { formatDate, formatArray, extractFromArray } from "@/utils/helpers";
+import { useAuthStore } from "@/stores/auth";
+import { storeToRefs } from "pinia";
 import Modal from "@/components/UI/Modal.vue";
 import Button from "@/components/UI/Button.vue";
 import Badge from "@/components/UI/Badge.vue";
@@ -21,10 +23,15 @@ const props = defineProps({
 
 const emit = defineEmits(["close", "updated"]);
 
+const authStore = useAuthStore();
+const { isSuperAdmin } = storeToRefs(authStore);
+
 const { fetchOneRecord, updateRecord, loading } = usePocketBase();
 const { showSuccess, showError } = useToast();
 
 const record = ref(null);
+const isEditing = ref(false);
+const editForm = reactive({});
 
 async function fetchRecord() {
     if (!props.recordId) return;
@@ -40,10 +47,75 @@ watch(
     () => props.open,
     async (newValue) => {
         if (newValue && props.recordId) {
+            isEditing.value = false;
             await fetchRecord();
         }
     },
 );
+
+function startEditing() {
+    if (!record.value) return;
+    editForm.Partner_Name = record.value.Partner_Name || "";
+    editForm.Partner_Type = Array.isArray(record.value.Partner_Type)
+        ? record.value.Partner_Type.join(", ")
+        : record.value.Partner_Type || "";
+    editForm.Name_of_Funder = record.value.Name_of_Funder || "";
+    editForm.Program_Area = Array.isArray(record.value.Program_Area)
+        ? record.value.Program_Area.join(", ")
+        : record.value.Program_Area || "";
+    editForm.Nature_of_Support = Array.isArray(record.value.Nature_of_Support)
+        ? record.value.Nature_of_Support.join(", ")
+        : record.value.Nature_of_Support || "";
+    editForm.Summary_of_support = record.value.Summary_of_support || "";
+    editForm.Start_date_of_support = record.value.Start_date_of_support
+        ? record.value.Start_date_of_support.split(" ")[0]
+        : "";
+    editForm.End_date_of_support = record.value.End_date_of_support
+        ? record.value.End_date_of_support.split(" ")[0]
+        : "";
+    editForm.Organization_focal_person = record.value.Organization_focal_person || "";
+    editForm.Email = record.value.Email || "";
+    editForm.Phone_number = record.value.Phone_number || "";
+    isEditing.value = true;
+}
+
+function cancelEditing() {
+    isEditing.value = false;
+}
+
+async function saveChanges() {
+    try {
+        const data = {
+            Partner_Name: editForm.Partner_Name,
+            Partner_Type: editForm.Partner_Type
+                .split(",")
+                .map(s => s.trim())
+                .filter(Boolean),
+            Name_of_Funder: editForm.Name_of_Funder,
+            Program_Area: editForm.Program_Area
+                .split(",")
+                .map(s => s.trim())
+                .filter(Boolean),
+            Nature_of_Support: editForm.Nature_of_Support
+                .split(",")
+                .map(s => s.trim())
+                .filter(Boolean),
+            Summary_of_support: editForm.Summary_of_support,
+            Start_date_of_support: editForm.Start_date_of_support,
+            End_date_of_support: editForm.End_date_of_support,
+            Organization_focal_person: editForm.Organization_focal_person,
+            Email: editForm.Email,
+            Phone_number: editForm.Phone_number,
+        };
+        const updated = await updateRecord("prmt_data", record.value.id, data);
+        record.value = updated;
+        isEditing.value = false;
+        showSuccess("Record updated successfully");
+        emit("updated");
+    } catch (error) {
+        showError("Failed to update record");
+    }
+}
 
 async function handleToggleApprove() {
     if (!record.value) return;
@@ -63,6 +135,7 @@ async function handleToggleApprove() {
 function handleClose() {
     emit("close");
     record.value = null;
+    isEditing.value = false;
 }
 </script>
 
@@ -71,12 +144,25 @@ function handleClose() {
         <template #footer>
             <Button variant="ghost" @click="handleClose"> Close </Button>
             <Button
-                v-if="record"
+                v-if="isSuperAdmin && record && !isEditing"
+                variant="outline-primary"
+                @click="startEditing"
+            >
+                Edit
+            </Button>
+            <template v-if="isEditing">
+                <Button variant="ghost" @click="cancelEditing"> Cancel </Button>
+                <Button variant="primary" :loading="loading" @click="saveChanges">
+                    Save Changes
+                </Button>
+            </template>
+            <Button
+                v-if="record && isSuperAdmin && !isEditing"
                 @click="handleToggleApprove"
                 :variant="record.approve ? 'danger' : 'primary'"
                 :loading="loading"
             >
-                {{ record.approve ? "✕ Unapprove" : "✓ Approve" }}
+                {{ record.approve ? "Unapprove" : "Approve" }}
             </Button>
         </template>
 
@@ -88,7 +174,105 @@ function handleClose() {
             <p class="mt-4 text-gray-600">Loading record details...</p>
         </div>
 
-        <!-- Record Content -->
+        <!-- Edit Mode -->
+        <div v-else-if="record && isEditing" class="space-y-6">
+            <!-- Partner Information (Edit) -->
+            <section>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="text-sm">&#127970;</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-secondary">Partner Information</h3>
+                </div>
+                <Card variant="bordered" padding="lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Partner Name</label>
+                            <input v-model="editForm.Partner_Name" type="text"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Partner Type (comma separated)</label>
+                            <input v-model="editForm.Partner_Type" type="text"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Email Address</label>
+                            <input v-model="editForm.Email" type="email"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Phone Number</label>
+                            <input v-model="editForm.Phone_number" type="text"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                        </div>
+                    </div>
+                </Card>
+            </section>
+
+            <!-- Support Details (Edit) -->
+            <section>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                        <span class="text-sm">&#128188;</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-secondary">Support Details</h3>
+                </div>
+                <Card variant="bordered" padding="lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Funding Organization</label>
+                            <input v-model="editForm.Name_of_Funder" type="text"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Program Areas (comma separated)</label>
+                            <input v-model="editForm.Program_Area" type="text"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Nature of Support (comma separated)</label>
+                            <input v-model="editForm.Nature_of_Support" type="text"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Start Date</label>
+                            <input v-model="editForm.Start_date_of_support" type="date"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">End Date</label>
+                            <input v-model="editForm.End_date_of_support" type="date"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                        </div>
+                        <div class="md:col-span-2 space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Summary of Support</label>
+                            <textarea v-model="editForm.Summary_of_support" rows="4"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm"></textarea>
+                        </div>
+                    </div>
+                </Card>
+            </section>
+
+            <!-- Contact Information (Edit) -->
+            <section>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                        <span class="text-sm">&#128100;</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-secondary">Contact Information</h3>
+                </div>
+                <Card variant="bordered" padding="lg">
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Organization Focal Person</label>
+                        <input v-model="editForm.Organization_focal_person" type="text"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                    </div>
+                </Card>
+            </section>
+        </div>
+
+        <!-- View Mode -->
         <div v-else-if="record" class="space-y-6">
             <!-- Status Banner -->
             <Card
@@ -107,7 +291,7 @@ function handleClose() {
                             "
                         >
                             <span class="text-xl">{{
-                                record.approve ? "✅" : "⏳"
+                                record.approve ? "&#9989;" : "&#9203;"
                             }}</span>
                         </div>
                         <div>
@@ -136,7 +320,7 @@ function handleClose() {
                     <div
                         class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center"
                     >
-                        <span class="text-sm">🏢</span>
+                        <span class="text-sm">&#127970;</span>
                     </div>
                     <h3 class="text-lg font-semibold text-secondary">
                         Partner Information
@@ -145,53 +329,35 @@ function handleClose() {
                 <Card variant="bordered" padding="lg">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Partner Name</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Partner Name</label>
                             <p class="font-semibold text-gray-900">
                                 {{ record.Partner_Name || "N/A" }}
                             </p>
                         </div>
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Partner Type</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Partner Type</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(type, index) in formatArray(
-                                        record.Partner_Type,
-                                    )"
+                                    v-for="(type, index) in formatArray(record.Partner_Type)"
                                     :key="index"
                                     class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-sm font-medium border border-blue-100"
                                 >
                                     {{ type }}
                                 </span>
                                 <span
-                                    v-if="
-                                        !record.Partner_Type ||
-                                        record.Partner_Type.length === 0
-                                    "
+                                    v-if="!record.Partner_Type || record.Partner_Type.length === 0"
                                     class="text-gray-400"
-                                    >N/A</span
-                                >
+                                >N/A</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Email Address</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Email Address</label>
                             <p class="font-medium text-gray-900">
                                 {{ record.Email || "N/A" }}
                             </p>
                         </div>
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Phone Number</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Phone Number</label>
                             <p class="font-medium text-gray-900">
                                 {{ record.Phone_number || "N/A" }}
                             </p>
@@ -203,102 +369,66 @@ function handleClose() {
             <!-- Support Details -->
             <section>
                 <div class="flex items-center gap-2 mb-4">
-                    <div
-                        class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center"
-                    >
-                        <span class="text-sm">💼</span>
+                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                        <span class="text-sm">&#128188;</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-secondary">
-                        Support Details
-                    </h3>
+                    <h3 class="text-lg font-semibold text-secondary">Support Details</h3>
                 </div>
                 <Card variant="bordered" padding="lg">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Funding Organization</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Funding Organization</label>
                             <p class="font-medium text-gray-900">
                                 {{ record.Name_of_Funder || "N/A" }}
                             </p>
                         </div>
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Program Areas</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Program Areas</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(area, index) in formatArray(
-                                        record.Program_Area,
-                                    )"
+                                    v-for="(area, index) in formatArray(record.Program_Area)"
                                     :key="index"
                                     class="px-2.5 py-1 bg-green-50 text-green-700 rounded-md text-sm font-medium border border-green-100"
                                 >
                                     {{ area }}
                                 </span>
                                 <span
-                                    v-if="
-                                        !record.Program_Area ||
-                                        record.Program_Area.length === 0
-                                    "
+                                    v-if="!record.Program_Area || record.Program_Area.length === 0"
                                     class="text-gray-400"
-                                    >N/A</span
-                                >
+                                >N/A</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Nature of Support</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Nature of Support</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(support, index) in formatArray(
-                                        record.Nature_of_Support,
-                                    )"
+                                    v-for="(support, index) in formatArray(record.Nature_of_Support)"
                                     :key="index"
                                     class="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-md text-sm font-medium border border-purple-100"
                                 >
                                     {{ support }}
                                 </span>
                                 <span
-                                    v-if="
-                                        !record.Nature_of_Support ||
-                                        record.Nature_of_Support.length === 0
-                                    "
+                                    v-if="!record.Nature_of_Support || record.Nature_of_Support.length === 0"
                                     class="text-gray-400"
-                                    >N/A</span
-                                >
+                                >N/A</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Start Date</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Start Date</label>
                             <p class="font-medium text-gray-900">
                                 {{ formatDate(record.Start_date_of_support) }}
                             </p>
                         </div>
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >End Date</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">End Date</label>
                             <p class="font-medium text-gray-900">
                                 {{ formatDate(record.End_date_of_support) }}
                             </p>
                         </div>
                         <div class="md:col-span-2 space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Summary of Support</label
-                            >
-                            <p
-                                class="font-medium text-gray-900 leading-relaxed"
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Summary of Support</label>
+                            <p class="font-medium text-gray-900 leading-relaxed">
                                 {{ record.Summary_of_support || "N/A" }}
                             </p>
                         </div>
@@ -309,22 +439,15 @@ function handleClose() {
             <!-- Geographic Coverage -->
             <section>
                 <div class="flex items-center gap-2 mb-4">
-                    <div
-                        class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"
-                    >
-                        <span class="text-sm">🗺️</span>
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <span class="text-sm">&#128506;</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-secondary">
-                        Geographic Coverage
-                    </h3>
+                    <h3 class="text-lg font-semibold text-secondary">Geographic Coverage</h3>
                 </div>
                 <Card variant="bordered" padding="lg">
                     <div class="grid grid-cols-1 gap-4">
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >State(s)</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">State(s)</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
                                     v-for="(state, index) in (record.state_names || [])"
@@ -336,83 +459,55 @@ function handleClose() {
                                 <span
                                     v-if="!record.state_names || record.state_names.length === 0"
                                     class="text-gray-400"
-                                    >N/A</span
-                                >
+                                >N/A</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Local Government Areas (LGAs)</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Local Government Areas (LGAs)</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(lga, index) in extractFromArray(
-                                        record.lga_data, 'lga',
-                                    )"
+                                    v-for="(lga, index) in extractFromArray(record.lga_data, 'lga')"
                                     :key="index"
                                     class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-sm font-medium border border-blue-100"
                                 >
                                     {{ lga }}
                                 </span>
                                 <span
-                                    v-if="
-                                        !record.lga_data ||
-                                        record.lga_data.length === 0
-                                    "
+                                    v-if="!record.lga_data || record.lga_data.length === 0"
                                     class="text-gray-400"
-                                    >N/A</span
-                                >
+                                >N/A</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Wards</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Wards</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(ward, index) in extractFromArray(
-                                        record.ward_data, 'ward',
-                                    )"
+                                    v-for="(ward, index) in extractFromArray(record.ward_data, 'ward')"
                                     :key="index"
                                     class="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md text-sm font-medium border border-indigo-100"
                                 >
                                     {{ ward }}
                                 </span>
                                 <span
-                                    v-if="
-                                        !record.ward_data ||
-                                        record.ward_data.length === 0
-                                    "
+                                    v-if="!record.ward_data || record.ward_data.length === 0"
                                     class="text-gray-400"
-                                    >N/A</span
-                                >
+                                >N/A</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label
-                                class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                                >Facilities</label
-                            >
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Facilities</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(facility, index) in extractFromArray(
-                                        record.facility_data, 'facility',
-                                    )"
+                                    v-for="(facility, index) in extractFromArray(record.facility_data, 'facility')"
                                     :key="index"
                                     class="px-2.5 py-1 bg-teal-50 text-teal-700 rounded-md text-sm font-medium border border-teal-100"
                                 >
                                     {{ facility }}
                                 </span>
                                 <span
-                                    v-if="
-                                        !record.facility_data ||
-                                        record.facility_data.length === 0
-                                    "
+                                    v-if="!record.facility_data || record.facility_data.length === 0"
                                     class="text-gray-400"
-                                    >N/A</span
-                                >
+                                >N/A</span>
                             </div>
                         </div>
                     </div>
@@ -422,21 +517,14 @@ function handleClose() {
             <!-- Contact Information -->
             <section>
                 <div class="flex items-center gap-2 mb-4">
-                    <div
-                        class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center"
-                    >
-                        <span class="text-sm">👤</span>
+                    <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                        <span class="text-sm">&#128100;</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-secondary">
-                        Contact Information
-                    </h3>
+                    <h3 class="text-lg font-semibold text-secondary">Contact Information</h3>
                 </div>
                 <Card variant="bordered" padding="lg">
                     <div class="space-y-1">
-                        <label
-                            class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-                            >Organization Focal Person</label
-                        >
+                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Organization Focal Person</label>
                         <p class="font-medium text-gray-900">
                             {{ record.Organization_focal_person || "N/A" }}
                         </p>
@@ -447,7 +535,7 @@ function handleClose() {
 
         <!-- No Data State -->
         <div v-else class="text-center py-12">
-            <div class="text-5xl mb-4">📭</div>
+            <div class="text-5xl mb-4">&#128237;</div>
             <p class="text-gray-500 font-medium">No record data available</p>
         </div>
     </Modal>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import Table from "@/components/UI/Table.vue";
 import FilterDropdown from "@/components/UI/FilterDropdown.vue";
 import Button from "@/components/UI/Button.vue";
@@ -20,6 +20,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    lockedState: {
+        type: String,
+        default: "",
+    },
 });
 
 const emit = defineEmits([
@@ -38,6 +42,21 @@ const sortColumn = ref("");
 const sortDirection = ref("asc");
 
 let searchTimeout = null;
+
+// Auto-set state filter when locked (state admin)
+const stateLocked = computed(() => !!props.lockedState);
+
+onMounted(() => {
+    if (props.lockedState) {
+        localStateFilter.value = props.lockedState;
+    }
+});
+
+watch(() => props.lockedState, (val) => {
+    if (val) {
+        localStateFilter.value = val;
+    }
+});
 
 watch(localSearch, (newValue) => {
     clearTimeout(searchTimeout);
@@ -160,6 +179,7 @@ const hasActiveFilters = computed(() => {
                     label="State"
                     :options="stateOptions"
                     v-model="localStateFilter"
+                    :disabled="stateLocked"
                 />
                 <FilterDropdown
                     label="LGA"
