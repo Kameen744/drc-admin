@@ -214,19 +214,49 @@ const hasActiveFilters = computed(() => {
             @sort="handleSort"
         >
             <template #Partner_Name="{ row }">
-                <div class="font-medium text-gray-900">{{ row.Partner_Name }}</div>
+                <div class="font-medium text-gray-900 truncate" :title="row.Partner_Name">{{ row.Partner_Name }}</div>
             </template>
             <template #Name_of_Funder="{ row }">
-                <span class="text-gray-700">{{ row.Name_of_Funder }}</span>
+                <span class="text-gray-700 truncate block" :title="row.Name_of_Funder">{{ row.Name_of_Funder }}</span>
             </template>
             <template #stateName="{ row }">
-                <span class="inline-flex items-center gap-1">
-                    <span class="w-2 h-2 rounded-full bg-blue-400"></span>
-                    {{ (row.state_names || []).join(", ") || "N/A" }}
-                </span>
+                <div v-if="(row.state_names || []).length" class="flex flex-wrap gap-1 items-center">
+                    <span
+                        v-for="state in (row.state_names || []).slice(0, 2)"
+                        :key="state"
+                        class="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 rounded px-1.5 py-0.5"
+                    >
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                        {{ state }}
+                    </span>
+                    <span
+                        v-if="(row.state_names || []).length > 2"
+                        class="text-xs text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 cursor-help"
+                        :title="(row.state_names || []).join(', ')"
+                    >
+                        +{{ (row.state_names || []).length - 2 }} more
+                    </span>
+                </div>
+                <span v-else class="text-gray-400">N/A</span>
             </template>
             <template #lgaName="{ row }">
-                <span class="text-gray-600">{{ extractFromArray(row.lga_data, "lga").join(", ") || "N/A" }}</span>
+                <div v-if="extractFromArray(row.lga_data, 'lga').length" class="flex flex-wrap gap-1 items-center">
+                    <span
+                        v-for="lga in extractFromArray(row.lga_data, 'lga').slice(0, 2)"
+                        :key="lga"
+                        class="text-xs bg-gray-100 text-gray-700 rounded px-1.5 py-0.5"
+                    >
+                        {{ lga }}
+                    </span>
+                    <span
+                        v-if="extractFromArray(row.lga_data, 'lga').length > 2"
+                        class="text-xs text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 cursor-help"
+                        :title="extractFromArray(row.lga_data, 'lga').join(', ')"
+                    >
+                        +{{ extractFromArray(row.lga_data, 'lga').length - 2 }} more
+                    </span>
+                </div>
+                <span v-else class="text-gray-400">N/A</span>
             </template>
             <template #Start_date_of_support="{ row }">
                 <span class="text-gray-700">{{ formatDate(row.Start_date_of_support) }}</span>

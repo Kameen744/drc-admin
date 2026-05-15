@@ -104,7 +104,7 @@ function getSortIcon(column) {
             <td
               v-for="column in columns"
               :key="column.key"
-              class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+              class="px-4 py-3 text-sm text-gray-900 max-w-[200px]"
               :class="column.class"
             >
               <slot :name="column.key" :row="row">
