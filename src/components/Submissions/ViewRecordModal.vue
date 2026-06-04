@@ -447,7 +447,7 @@ function handleClose() {
                 <Card variant="bordered" padding="lg">
                     <div class="grid grid-cols-1 gap-4">
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">State(s)</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Province(s)</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
                                     v-for="(state, index) in (record.state_names || [])"
@@ -463,10 +463,10 @@ function handleClose() {
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Local Government Areas (LGAs)</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Territories</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(lga, index) in extractFromArray(record.lga_data, 'lga')"
+                                     v-for="(lga, index) in extractFromArray(record.lga_data, 'territory')"
                                     :key="index"
                                     class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-sm font-medium border border-blue-100"
                                 >
@@ -479,10 +479,10 @@ function handleClose() {
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Wards</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Chiefdoms</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
-                                    v-for="(ward, index) in extractFromArray(record.ward_data, 'ward')"
+                                     v-for="(ward, index) in extractFromArray(record.ward_data, 'chiefdom')"
                                     :key="index"
                                     class="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md text-sm font-medium border border-indigo-100"
                                 >

@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isSuperAdmin = computed(() => user.value?.role === 'super_admin')
   const isStateAdmin = computed(() => user.value?.role === 'state_admin')
 
-  // For state_admin: resolve the assigned state name from the relation
+  // For province_admin: resolve the assigned province name from the relation
   const assignedState = computed(() => {
     if (!user.value?.state_assignment) return null
     // PocketBase expand returns the full relation object

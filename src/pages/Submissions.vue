@@ -36,7 +36,7 @@ const filters = ref({
     sortDirection: "asc",
 });
 
-// Auto-apply state filter for state admins
+// Auto-apply province filter for province admins
 const lockedState = computed(() => {
     if (isStateAdmin.value && assignedState.value) {
         return assignedState.value;
@@ -79,7 +79,7 @@ function buildFilter() {
     }
 
     if (filters.value.lga) {
-        filterParts.push(`lga_data.lga ~ "${filters.value.lga}"`);
+        filterParts.push(`lga_data.territory ~ "${filters.value.lga}"`);
     }
 
     if (filters.value.approval !== "") {
@@ -174,7 +174,7 @@ onMounted(async () => {
             </p>
         </div>
 
-        <!-- State Admin Notice -->
+        <!-- Province Admin Notice -->
         <div v-if="lockedState" class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center gap-3">
             <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -226,7 +226,7 @@ onMounted(async () => {
                         <span class="text-2xl">🗺️</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 font-medium">States Covered</p>
+                         <p class="text-sm text-gray-500 font-medium">Provinces Covered</p>
                         <p class="text-2xl font-bold text-blue-600">{{ stats.uniqueStates }}</p>
                     </div>
                 </div>

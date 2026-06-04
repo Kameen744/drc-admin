@@ -43,7 +43,7 @@ const sortDirection = ref("asc");
 
 let searchTimeout = null;
 
-// Auto-set state filter when locked (state admin)
+// Auto-set province filter when locked (province admin)
 const stateLocked = computed(() => !!props.lockedState);
 
 onMounted(() => {
@@ -92,8 +92,8 @@ function handleSort({ column, direction }) {
 const columns = [
     { key: "Partner_Name", label: "Partner Name" },
     { key: "Name_of_Funder", label: "Funder" },
-    { key: "stateName", label: "State" },
-    { key: "lgaName", label: "LGA" },
+    { key: "stateName", label: "Province" },
+    { key: "lgaName", label: "Territory" },
     { key: "Start_date_of_support", label: "Start Date", sortable: true },
     { key: "End_date_of_support", label: "End Date", sortable: true },
     { key: "status", label: "Status" },
@@ -105,18 +105,18 @@ const stateOptions = computed(() => {
         ...new Set(props.records.flatMap((r) => r.state_names || []).filter(Boolean)),
     ];
     return [
-        { value: "", label: "All States" },
+        { value: "", label: "All Provinces" },
         ...uniqueStates.map((s) => ({ value: s, label: s })),
     ];
 });
 
 const lgaOptions = computed(() => {
     const allLGAs = props.records
-        .flatMap((r) => extractFromArray(r.lga_data, "lga"))
+        .flatMap((r) => extractFromArray(r.lga_data, "territory"))
         .filter(Boolean);
     const uniqueLGAs = [...new Set(allLGAs)];
     return [
-        { value: "", label: "All LGAs" },
+        { value: "", label: "All Territories" },
         ...uniqueLGAs.map((l) => ({ value: l, label: l })),
     ];
 });
@@ -176,13 +176,13 @@ const hasActiveFilters = computed(() => {
             <!-- Filter dropdowns -->
             <div class="flex flex-wrap gap-3">
                 <FilterDropdown
-                    label="State"
+                    label="Province"
                     :options="stateOptions"
                     v-model="localStateFilter"
                     :disabled="stateLocked"
                 />
                 <FilterDropdown
-                    label="LGA"
+                    label="Territory"
                     :options="lgaOptions"
                     v-model="localLgaFilter"
                 />
@@ -240,20 +240,20 @@ const hasActiveFilters = computed(() => {
                 <span v-else class="text-gray-400">N/A</span>
             </template>
             <template #lgaName="{ row }">
-                <div v-if="extractFromArray(row.lga_data, 'lga').length" class="flex flex-wrap gap-1 items-center">
+                <div v-if="extractFromArray(row.lga_data, 'territory').length" class="flex flex-wrap gap-1 items-center">
                     <span
-                        v-for="lga in extractFromArray(row.lga_data, 'lga').slice(0, 2)"
+                        v-for="lga in extractFromArray(row.lga_data, 'territory').slice(0, 2)"
                         :key="lga"
                         class="text-xs bg-gray-100 text-gray-700 rounded px-1.5 py-0.5"
                     >
                         {{ lga }}
                     </span>
                     <span
-                        v-if="extractFromArray(row.lga_data, 'lga').length > 2"
+                        v-if="extractFromArray(row.lga_data, 'territory').length > 2"
                         class="text-xs text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 cursor-help"
-                        :title="extractFromArray(row.lga_data, 'lga').join(', ')"
+                        :title="extractFromArray(row.lga_data, 'territory').join(', ')"
                     >
-                        +{{ extractFromArray(row.lga_data, 'lga').length - 2 }} more
+                        +{{ extractFromArray(row.lga_data, 'territory').length - 2 }} more
                     </span>
                 </div>
                 <span v-else class="text-gray-400">N/A</span>

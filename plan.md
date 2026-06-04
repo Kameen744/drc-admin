@@ -6,7 +6,7 @@ Build a simple admin dashboard for managing PRMT data submissions with authentic
 ## Technology Stack
 - **Frontend Framework**: Vue 3 (with Vite for fast development)
 - **Package Manager**: Bun
-- **Backend/Database**: PocketBase (already hosted at https://pb-prmt.resourcetrackr.com)
+- **Backend/Database**: PocketBase (already hosted at https://pb-drc.resourcetrackr.com)
 - **Styling**: Tailwind CSS
 - **HTTP Client**: PocketBase JavaScript SDK
 - **Routing**: Vue Router
@@ -164,7 +164,7 @@ prmt-admin/
 - [ ] Create router/index.js file
 - [ ] Configure Tailwind CSS with custom colors (#09cbc0, #20355a) in tailwind.config.js
 - [ ] Configure vue3-toastify in main.js
-- [ ] Create .env file with PocketBase URL: `VITE_POCKETBASE_URL=https://pb-prmt.resourcetrackr.com`
+- [ ] Create .env file with PocketBase URL: `VITE_POCKETBASE_URL=https://pb-drc.resourcetrackr.com`
 - [ ] Create .env.example file with placeholder URL
 - [ ] Add `.env` to .gitignore
 - [ ] Configure ESLint and Prettier (optional)
@@ -390,7 +390,7 @@ const facilityName = record.expand.Facility?.name
 
 Create `.env` file in project root:
 ```env
-VITE_POCKETBASE_URL=https://pb-prmt.resourcetrackr.com
+VITE_POCKETBASE_URL=https://pb-drc.resourcetrackr.com
 ```
 
 Create `.env.example` file (commit to git):

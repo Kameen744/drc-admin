@@ -20,7 +20,7 @@ export function formatArray(arr) {
 }
 
 // Extract values from an array of objects by key
-// e.g. extractFromArray([{lga: "Gwadabawa"}, {lga: "Michika"}], "lga") => ["Gwadabawa", "Michika"]
+// e.g. extractFromArray([{territory: "Gwadabawa"}, {territory: "Michika"}], "territory") => ["Gwadabawa", "Michika"]
 export function extractFromArray(arr, key) {
   if (!arr || !Array.isArray(arr)) return []
   return arr.map(item => item?.[key]).filter(Boolean)
