@@ -26,9 +26,9 @@ jobs:
       - name: Set deployment path
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            echo "DEPLOY_PATH=/var/www/prmt/admin" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/var/www/rsmp-drc/drc-admin" >> $GITHUB_ENV
           else
-            echo "DEPLOY_PATH=/var/www/prmt/admin/map-dev" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/var/www/rsmp-drc/drc-admin/admin-dev" >> $GITHUB_ENV
           fi
 
       - name: Debug deployment path
