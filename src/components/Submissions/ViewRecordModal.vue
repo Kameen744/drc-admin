@@ -318,7 +318,7 @@ function handleClose() {
             </Card>
 
             <!-- Partner Information -->
-            <section>
+            <section class="border-l-[3px] border-l-primary/40 pl-3">
                 <div class="flex items-center gap-2 mb-4">
                     <div
                         class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center"
@@ -329,15 +329,15 @@ function handleClose() {
                         {{ t("sections.partnerInformation") }}
                     </h3>
                 </div>
-                <Card variant="bordered" padding="lg">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-1">
+                <Card variant="bordered" padding="lg" class="shadow-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.partnerNameView") }}</label>
                             <p class="font-semibold text-gray-900">
                                 {{ record.Partner_Name || t("app.na") }}
                             </p>
                         </div>
-                        <div class="space-y-1">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.partnerType") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
@@ -353,13 +353,13 @@ function handleClose() {
                                 >{{ t("app.na") }}</span>
                             </div>
                         </div>
-                        <div class="space-y-1">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.emailAddress") }}</label>
                             <p class="font-medium text-gray-900">
                                 {{ record.Email || t("app.na") }}
                             </p>
                         </div>
-                        <div class="space-y-1">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.phoneNumber") }}</label>
                             <p class="font-medium text-gray-900">
                                 {{ record.Phone_number || t("app.na") }}
@@ -370,33 +370,22 @@ function handleClose() {
             </section>
 
             <!-- Support Details -->
-            <section>
+            <section class="border-l-[3px] border-l-green-400/40 pl-3">
                 <div class="flex items-center gap-2 mb-4">
                     <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
                         <span class="text-sm">&#128188;</span>
                     </div>
                     <h3 class="text-lg font-semibold text-secondary">{{ t("sections.supportDetails") }}</h3>
                 </div>
-                <Card variant="bordered" padding="lg">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-1">
+                <Card variant="bordered" padding="lg" class="shadow-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.fundingOrganization") }}</label>
                             <p class="font-medium text-gray-900">
                                 {{ record.Name_of_Funder || t("app.na") }}
                             </p>
                         </div>
-                        <div class="md:col-span-2 space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.programAreas") }}</label>
-                            <div class="mt-1">
-                                <ProgramAreaTree
-                                    v-if="record.Program_Area && typeof record.Program_Area === 'object' && !Array.isArray(record.Program_Area)"
-                                    :modelValue="record.Program_Area"
-                                    readonly
-                                />
-                                <span v-else class="text-gray-400">{{ t("app.na") }}</span>
-                            </div>
-                        </div>
-                        <div class="space-y-1">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.natureOfSupport") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
@@ -412,19 +401,30 @@ function handleClose() {
                                 >{{ t("app.na") }}</span>
                             </div>
                         </div>
-                        <div class="space-y-1">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.startDate") }}</label>
                             <p class="font-medium text-gray-900">
                                 {{ formatDate(record.Start_date_of_support) }}
                             </p>
                         </div>
-                        <div class="space-y-1">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.endDate") }}</label>
                             <p class="font-medium text-gray-900">
                                 {{ formatDate(record.End_date_of_support) }}
                             </p>
                         </div>
-                        <div class="md:col-span-2 space-y-1">
+                        <div class="md:col-span-2 bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.programAreas") }}</label>
+                            <div class="mt-1">
+                                <ProgramAreaTree
+                                    v-if="record.Program_Area && typeof record.Program_Area === 'object' && !Array.isArray(record.Program_Area)"
+                                    :modelValue="record.Program_Area"
+                                    readonly
+                                />
+                                <span v-else class="text-gray-400">{{ t("app.na") }}</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.summaryOfSupport") }}</label>
                             <p class="font-medium text-gray-900 leading-relaxed">
                                 {{ record.Summary_of_support || t("app.na") }}
@@ -435,16 +435,16 @@ function handleClose() {
             </section>
 
             <!-- Geographic Coverage -->
-            <section>
+            <section class="border-l-[3px] border-l-blue-400/40 pl-3">
                 <div class="flex items-center gap-2 mb-4">
                     <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                         <span class="text-sm">&#128506;</span>
                     </div>
                     <h3 class="text-lg font-semibold text-secondary">{{ t("sections.geographicCoverage") }}</h3>
                 </div>
-                <Card variant="bordered" padding="lg">
-                    <div class="grid grid-cols-1 gap-4">
-                        <div class="space-y-1">
+                <Card variant="bordered" padding="lg" class="shadow-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.provinces") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
@@ -460,7 +460,7 @@ function handleClose() {
                                 >{{ t("app.na") }}</span>
                             </div>
                         </div>
-                        <div class="space-y-1">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.territories") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
@@ -476,7 +476,7 @@ function handleClose() {
                                 >{{ t("app.na") }}</span>
                             </div>
                         </div>
-                        <div class="space-y-1">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.chiefdoms") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
@@ -492,7 +492,7 @@ function handleClose() {
                                 >{{ t("app.na") }}</span>
                             </div>
                         </div>
-                        <div class="space-y-1">
+                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.facilities") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
@@ -513,15 +513,15 @@ function handleClose() {
             </section>
 
             <!-- Contact Information -->
-            <section>
+            <section class="border-l-[3px] border-l-orange-400/40 pl-3">
                 <div class="flex items-center gap-2 mb-4">
                     <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
                         <span class="text-sm">&#128100;</span>
                     </div>
                     <h3 class="text-lg font-semibold text-secondary">{{ t("sections.contactInformation") }}</h3>
                 </div>
-                <Card variant="bordered" padding="lg">
-                    <div class="space-y-1">
+                <Card variant="bordered" padding="lg" class="shadow-sm">
+                    <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                         <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.orgFocalPerson") }}</label>
                         <p class="font-medium text-gray-900">
                             {{ record.Organization_focal_person || t("app.na") }}
