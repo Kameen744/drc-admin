@@ -4,8 +4,9 @@ import Table from "@/components/UI/Table.vue";
 import FilterDropdown from "@/components/UI/FilterDropdown.vue";
 import Button from "@/components/UI/Button.vue";
 import Badge from "@/components/UI/Badge.vue";
-import { formatDate, getBadgeClass, getStatusText, extractFromArray } from "@/utils/helpers";
+import { formatDate, getBadgeClass, extractFromArray, extractProgramAreaNames } from "@/utils/helpers";
 import { usePocketBase } from "@/composables/usePocketBase";
+import { t } from "@/i18n";
 
 const props = defineProps({
     records: {
@@ -89,23 +90,24 @@ function handleSort({ column, direction }) {
     emit("sort-change", { column, direction });
 }
 
-const columns = [
-    { key: "Partner_Name", label: "Partner Name" },
-    { key: "Name_of_Funder", label: "Funder" },
-    { key: "stateName", label: "Province" },
-    { key: "lgaName", label: "Territory" },
-    { key: "Start_date_of_support", label: "Start Date", sortable: true },
-    { key: "End_date_of_support", label: "End Date", sortable: true },
-    { key: "status", label: "Status" },
-    { key: "actions", label: "Actions" },
-];
+const columns = computed(() => [
+    { key: "Partner_Name", label: t("table.partnerName") },
+    { key: "Name_of_Funder", label: t("table.funder") },
+    { key: "Program_Area", label: t("table.programAreas") },
+    { key: "stateName", label: t("table.province") },
+    { key: "lgaName", label: t("table.territory") },
+    { key: "Start_date_of_support", label: t("table.startDate"), sortable: true },
+    { key: "End_date_of_support", label: t("table.endDate"), sortable: true },
+    { key: "status", label: t("table.status") },
+    { key: "actions", label: t("table.actions") },
+]);
 
 const stateOptions = computed(() => {
     const uniqueStates = [
         ...new Set(props.records.flatMap((r) => r.state_names || []).filter(Boolean)),
     ];
     return [
-        { value: "", label: "All Provinces" },
+        { value: "", label: t("table.allProvinces") },
         ...uniqueStates.map((s) => ({ value: s, label: s })),
     ];
 });
@@ -116,16 +118,16 @@ const lgaOptions = computed(() => {
         .filter(Boolean);
     const uniqueLGAs = [...new Set(allLGAs)];
     return [
-        { value: "", label: "All Territories" },
+        { value: "", label: t("table.allTerritories") },
         ...uniqueLGAs.map((l) => ({ value: l, label: l })),
     ];
 });
 
-const approvalOptions = [
-    { value: "", label: "All Statuses" },
-    { value: "true", label: "Approved" },
-    { value: "false", label: "Pending" },
-];
+const approvalOptions = computed(() => [
+    { value: "", label: t("table.allStatuses") },
+    { value: "true", label: t("table.approved") },
+    { value: "false", label: t("table.pending") },
+]);
 
 const perPageOptions = [10, 20, 25, 50];
 
@@ -159,7 +161,7 @@ const hasActiveFilters = computed(() => {
                 <input
                     v-model="localSearch"
                     type="text"
-                    placeholder="Search by partner name, funder, email, phone, or summary..."
+                    :placeholder="t('table.searchPlaceholder')"
                     class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
                 />
                 <button
@@ -176,18 +178,18 @@ const hasActiveFilters = computed(() => {
             <!-- Filter dropdowns -->
             <div class="flex flex-wrap gap-3">
                 <FilterDropdown
-                    label="Province"
+                    :label="t('filter.province')"
                     :options="stateOptions"
                     v-model="localStateFilter"
                     :disabled="stateLocked"
                 />
                 <FilterDropdown
-                    label="Territory"
+                    :label="t('filter.territory')"
                     :options="lgaOptions"
                     v-model="localLgaFilter"
                 />
                 <FilterDropdown
-                    label="Approval Status"
+                    :label="t('filter.approvalStatus')"
                     :options="approvalOptions"
                     v-model="localApprovalFilter"
                 />
@@ -199,7 +201,7 @@ const hasActiveFilters = computed(() => {
                     class="self-end"
                 >
                     <span>✕</span>
-                    Clear Filters
+                    {{ t("table.clearFilters") }}
                 </Button>
             </div>
         </div>
@@ -219,6 +221,25 @@ const hasActiveFilters = computed(() => {
             <template #Name_of_Funder="{ row }">
                 <span class="text-gray-700 truncate block" :title="row.Name_of_Funder">{{ row.Name_of_Funder }}</span>
             </template>
+            <template #Program_Area="{ row }">
+                <div v-if="row.Program_Area && typeof row.Program_Area === 'object' && !Array.isArray(row.Program_Area)" class="flex flex-wrap gap-1 items-center">
+                    <span
+                        v-for="(area, index) in extractProgramAreaNames(row.Program_Area).slice(0, 2)"
+                        :key="index"
+                        class="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 rounded px-1.5 py-0.5"
+                    >
+                        {{ area }}
+                    </span>
+                    <span
+                        v-if="extractProgramAreaNames(row.Program_Area).length > 2"
+                        class="text-xs text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 cursor-help"
+                        :title="extractProgramAreaNames(row.Program_Area).join(', ')"
+                    >
+                        +{{ extractProgramAreaNames(row.Program_Area).length - 2 }} {{ t("app.more") }}
+                    </span>
+                </div>
+                <span v-else class="text-gray-400">{{ t("app.na") }}</span>
+            </template>
             <template #stateName="{ row }">
                 <div v-if="(row.state_names || []).length" class="flex flex-wrap gap-1 items-center">
                     <span
@@ -234,10 +255,10 @@ const hasActiveFilters = computed(() => {
                         class="text-xs text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 cursor-help"
                         :title="(row.state_names || []).join(', ')"
                     >
-                        +{{ (row.state_names || []).length - 2 }} more
+                        +{{ (row.state_names || []).length - 2 }} {{ t("app.more") }}
                     </span>
                 </div>
-                <span v-else class="text-gray-400">N/A</span>
+                <span v-else class="text-gray-400">{{ t("app.na") }}</span>
             </template>
             <template #lgaName="{ row }">
                 <div v-if="extractFromArray(row.lga_data, 'territory').length" class="flex flex-wrap gap-1 items-center">
@@ -253,10 +274,10 @@ const hasActiveFilters = computed(() => {
                         class="text-xs text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 cursor-help"
                         :title="extractFromArray(row.lga_data, 'territory').join(', ')"
                     >
-                        +{{ extractFromArray(row.lga_data, 'territory').length - 2 }} more
+                        +{{ extractFromArray(row.lga_data, 'territory').length - 2 }} {{ t("app.more") }}
                     </span>
                 </div>
-                <span v-else class="text-gray-400">N/A</span>
+                <span v-else class="text-gray-400">{{ t("app.na") }}</span>
             </template>
             <template #Start_date_of_support="{ row }">
                 <span class="text-gray-700">{{ formatDate(row.Start_date_of_support) }}</span>
@@ -269,7 +290,7 @@ const hasActiveFilters = computed(() => {
                     :variant="row.approve ? 'success' : 'warning'"
                     :dot="true"
                 >
-                    {{ getStatusText(row.approve) }}
+                    {{ row.approve ? t("table.approved") : t("table.pending") }}
                 </Badge>
             </template>
             <template #actions="{ row }">
@@ -278,7 +299,7 @@ const hasActiveFilters = computed(() => {
                     variant="outline-primary"
                     size="sm"
                 >
-                    👁️ View
+                    👁️ {{ t("table.view") }}
                 </Button>
             </template>
         </Table>
@@ -288,7 +309,7 @@ const hasActiveFilters = computed(() => {
             class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-gray-200"
         >
             <div class="flex items-center gap-2 text-sm text-gray-600">
-                <span>Showing</span>
+                <span>{{ t("table.showing") }}</span>
                 <select
                     :value="pagination.perPage"
                     @change="$emit('per-page-change', $event.target.value)"
@@ -302,7 +323,7 @@ const hasActiveFilters = computed(() => {
                         {{ option }}
                     </option>
                 </select>
-                <span>per page</span>
+                <span>{{ t("table.perPage") }}</span>
             </div>
 
             <div class="flex items-center gap-2">
@@ -312,10 +333,10 @@ const hasActiveFilters = computed(() => {
                     variant="outline-secondary"
                     size="sm"
                 >
-                    ← Previous
+                    ← {{ t("table.previous") }}
                 </Button>
                 <span class="text-sm text-gray-600 px-2">
-                    Page <strong>{{ pagination.page }}</strong> of
+                    {{ t("table.page") }} <strong>{{ pagination.page }}</strong> {{ t("table.of") }}
                     <strong>{{ pagination.totalPages || 1 }}</strong>
                 </span>
                 <Button
@@ -324,7 +345,7 @@ const hasActiveFilters = computed(() => {
                     variant="outline-secondary"
                     size="sm"
                 >
-                    Next →
+                    {{ t("table.next") }} →
                 </Button>
             </div>
         </div>

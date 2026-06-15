@@ -1,0 +1,146 @@
+{
+  "app": {
+    "title": "Tableau de bord administratif du PRMT",
+    "dashboard": "Tableau de bord",
+    "logout": "Déconnexion",
+    "loggedOut": "Déconnecté avec succès",
+    "signedInAs": "Connecté en tant que",
+    "user": "Utilisateur",
+    "na": "N/D",
+    "prmtAdmin": "PRMT Admin",
+    "more": "plus"
+  },
+  "nav": {
+    "submissions": "Soumissions",
+    "submissionsDesc": "Consulter et gérer les soumissions des partenaires"
+  },
+  "auth": {
+    "appName": "Système de Suivi des Ressources des Partenaires",
+    "welcomeBack": "Bon retour",
+    "signIn": "Connectez-vous pour accéder à votre tableau de bord",
+    "signingIn": "Connexion en cours...",
+    "success": "Connexion réussie ! Bon retour.",
+    "invalidCredentials": "Adresse e-mail ou mot de passe invalide",
+    "helpText": "Besoin d'aide ? Contactez votre administrateur système",
+    "email": {
+      "label": "Adresse e-mail",
+      "placeholder": "Saisissez votre adresse e-mail"
+    },
+    "password": {
+      "label": "Mot de passe",
+      "placeholder": "Saisissez votre mot de passe"
+    },
+    "login": "Se connecter",
+    "emailRequired": "L'adresse e-mail est requise",
+    "validEmail": "Veuillez saisir une adresse e-mail valide",
+    "passwordRequired": "Le mot de passe est requis"
+  },
+  "submissions": {
+    "title": "Soumissions PRMT",
+    "description": "Consulter et gérer les soumissions de données PRMT",
+    "viewingFor": "Affichage des soumissions pour",
+    "only": "uniquement",
+    "totalSubmissions": "Total des soumissions",
+    "approved": "Approuvées",
+    "pending": "En attente",
+    "provincesCovered": "Provinces couvertes",
+    "errorTitle": "Erreur de chargement des données",
+    "retry": "Réessayer",
+    "failedLoad": "Échec du chargement des soumissions. Veuillez réessayer.",
+    "failedInitial": "Échec du chargement initial des données. Veuillez actualiser la page."
+  },
+  "table": {
+    "partnerName": "Nom du partenaire",
+    "funder": "Bailleur",
+    "programAreas": "Domaines de Programme",
+    "province": "Province",
+    "territory": "Territoire",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "status": "Statut",
+    "actions": "Actions",
+    "searchPlaceholder": "Rechercher par nom du partenaire, bailleur, e-mail, téléphone ou résumé...",
+    "allProvinces": "Toutes les provinces",
+    "allTerritories": "Tous les territoires",
+    "allStatuses": "Tous les statuts",
+    "approved": "Approuvé",
+    "pending": "En attente",
+    "clearFilters": "Effacer les filtres",
+    "view": "Voir",
+    "showing": "Affichage",
+    "perPage": "par page",
+    "page": "Page",
+    "of": "sur",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "noRecords": "Aucun enregistrement trouvé",
+    "noRecordsHint": "Essayez d'ajuster vos filtres ou votre recherche"
+  },
+  "filter": {
+    "province": "Province",
+    "territory": "Territoire",
+    "approvalStatus": "Statut d'approbation",
+    "select": "Sélectionner..."
+  },
+  "modal": {
+    "recordDetails": "Détails de l'enregistrement",
+    "close": "Fermer",
+    "edit": "Modifier",
+    "cancel": "Annuler",
+    "saveChanges": "Enregistrer les modifications",
+    "approve": "Approuver",
+    "unapprove": "Désapprouver",
+    "loadingRecord": "Chargement des détails de l'enregistrement...",
+    "noRecord": "Aucune donnée d'enregistrement disponible",
+    "approvalStatus": "Statut d'approbation",
+    "approved": "Approuvé",
+    "pendingReview": "En attente d'examen"
+  },
+  "sections": {
+    "partnerInformation": "Informations sur le partenaire",
+    "supportDetails": "Détails du soutien",
+    "geographicCoverage": "Couverture géographique",
+    "contactInformation": "Coordonnées"
+  },
+  "fields": {
+    "partnerName": "Nom du partenaire",
+    "partnerNameView": "Nom du partenaire",
+    "partnerType": "Type de partenaire",
+    "emailAddress": "Adresse e-mail",
+    "phoneNumber": "Numéro de téléphone",
+    "fundingOrganization": "Organisme bailleur",
+    "programAreas": "Domaines de programme",
+    "natureOfSupport": "Nature du soutien",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "summaryOfSupport": "Résumé du soutien",
+    "provinces": "Province(s)",
+    "territories": "Territoires",
+    "chiefdoms": "Chefferies",
+    "facilities": "Établissements",
+    "orgFocalPerson": "Point focal de l'organisation",
+    "partnerTypeHint": "Type de partenaire (séparé par des virgules)",
+    "programAreasHint": "Domaines de programme (séparés par des virgules)",
+    "natureOfSupportHint": "Nature du soutien (séparée par des virgules)"
+  },
+  "error": {
+    "loadData": "Échec du chargement des données. Veuillez réessayer",
+    "updateRecord": "Échec de la mise à jour de l'enregistrement. Veuillez réessayer",
+    "loadRecord": "Échec du chargement de l'enregistrement. Veuillez réessayer"
+  },
+  "success": {
+    "recordUpdated": "Enregistrement mis à jour avec succès",
+    "recordStatusUpdated": "Statut de l'enregistrement mis à jour avec succès",
+    "updateFailed": "Échec de la mise à jour de l'enregistrement",
+    "statusUpdateFailed": "Échec de la mise à jour du statut de l'enregistrement"
+  },
+  "empty": {
+    "title": "Aucune donnée trouvée",
+    "description": "Il n'y a aucun élément à afficher pour le moment.",
+    "defaultTitle": "Aucune donnée trouvée",
+    "defaultDescription": "Il n'y a aucun élément à afficher pour le moment."
+  },
+  "meta": {
+    "title": "Tableau de bord administratif du PRMT"
+  }
+}

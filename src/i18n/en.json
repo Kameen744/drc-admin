@@ -1,0 +1,146 @@
+{
+  "app": {
+    "title": "PRMT Admin Dashboard",
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "loggedOut": "Logged out successfully",
+    "signedInAs": "Signed in as",
+    "user": "User",
+    "na": "N/A",
+    "prmtAdmin": "PRMT Admin",
+    "more": "more"
+  },
+  "nav": {
+    "submissions": "Submissions",
+    "submissionsDesc": "View and manage partner submissions"
+  },
+  "auth": {
+    "appName": "Partner Resource Management Tracker",
+    "welcomeBack": "Welcome back",
+    "signIn": "Sign in to access your dashboard",
+    "signingIn": "Signing in...",
+    "success": "Login successful! Welcome back.",
+    "invalidCredentials": "Invalid email or password",
+    "helpText": "Need help? Contact your system administrator",
+    "email": {
+      "label": "Email",
+      "placeholder": "Enter your email"
+    },
+    "password": {
+      "label": "Password",
+      "placeholder": "Enter your password"
+    },
+    "login": "Login",
+    "emailRequired": "Email is required",
+    "validEmail": "Please enter a valid email",
+    "passwordRequired": "Password is required"
+  },
+  "submissions": {
+    "title": "PRMT Submissions",
+    "description": "View and manage PRMT data submissions",
+    "viewingFor": "Viewing submissions for",
+    "only": "only",
+    "totalSubmissions": "Total Submissions",
+    "approved": "Approved",
+    "pending": "Pending",
+    "provincesCovered": "Provinces Covered",
+    "errorTitle": "Error Loading Data",
+    "retry": "Retry",
+    "failedLoad": "Failed to load submissions. Please try again.",
+    "failedInitial": "Failed to load initial data. Please refresh the page."
+  },
+  "table": {
+    "partnerName": "Partner Name",
+    "funder": "Funder",
+    "programAreas": "Program Areas",
+    "province": "Province",
+    "territory": "Territory",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "status": "Status",
+    "actions": "Actions",
+    "searchPlaceholder": "Search by partner name, funder, email, phone, or summary...",
+    "allProvinces": "All Provinces",
+    "allTerritories": "All Territories",
+    "allStatuses": "All Statuses",
+    "approved": "Approved",
+    "pending": "Pending",
+    "clearFilters": "Clear Filters",
+    "view": "View",
+    "showing": "Showing",
+    "perPage": "per page",
+    "page": "Page",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next",
+    "noRecords": "No records found",
+    "noRecordsHint": "Try adjusting your filters or search query"
+  },
+  "filter": {
+    "province": "Province",
+    "territory": "Territory",
+    "approvalStatus": "Approval Status",
+    "select": "Select..."
+  },
+  "modal": {
+    "recordDetails": "Record Details",
+    "close": "Close",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "approve": "Approve",
+    "unapprove": "Unapprove",
+    "loadingRecord": "Loading record details...",
+    "noRecord": "No record data available",
+    "approvalStatus": "Approval Status",
+    "approved": "Approved",
+    "pendingReview": "Pending Review"
+  },
+  "sections": {
+    "partnerInformation": "Partner Information",
+    "supportDetails": "Support Details",
+    "geographicCoverage": "Geographic Coverage",
+    "contactInformation": "Contact Information"
+  },
+  "fields": {
+    "partnerName": "Partner Name",
+    "partnerNameView": "Partner Name",
+    "partnerType": "Partner Type",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone Number",
+    "fundingOrganization": "Funding Organization",
+    "programAreas": "Program Areas",
+    "natureOfSupport": "Nature of Support",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "summaryOfSupport": "Summary of Support",
+    "provinces": "Province(s)",
+    "territories": "Territories",
+    "chiefdoms": "Chiefdoms",
+    "facilities": "Facilities",
+    "orgFocalPerson": "Organization Focal Person",
+    "partnerTypeHint": "Partner Type (comma separated)",
+    "programAreasHint": "Program Areas (comma separated)",
+    "natureOfSupportHint": "Nature of Support (comma separated)"
+  },
+  "error": {
+    "loadData": "Failed to load data. Please try again",
+    "updateRecord": "Failed to update record. Please try again",
+    "loadRecord": "Failed to load record. Please try again"
+  },
+  "success": {
+    "recordUpdated": "Record updated successfully",
+    "recordStatusUpdated": "Record status updated successfully",
+    "updateFailed": "Failed to update record",
+    "statusUpdateFailed": "Failed to update record status"
+  },
+  "empty": {
+    "title": "No data found",
+    "description": "There are no items to display at the moment.",
+    "defaultTitle": "No data found",
+    "defaultDescription": "There are no items to display at the moment."
+  },
+  "meta": {
+    "title": "PRMT Admin Dashboard"
+  }
+}
