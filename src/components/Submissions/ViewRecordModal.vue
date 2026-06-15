@@ -2,13 +2,15 @@
 import { ref, watch, reactive } from "vue";
 import { usePocketBase } from "@/composables/usePocketBase";
 import { useToast } from "@/composables/useToast";
-import { formatDate, formatArray, extractFromArray } from "@/utils/helpers";
+import { formatDate, formatArray, extractFromArray, extractProgramAreaNames } from "@/utils/helpers";
+import ProgramAreaTree from "@/components/Submissions/ProgramAreaTree.vue";
 import { useAuthStore } from "@/stores/auth";
 import { storeToRefs } from "pinia";
 import Modal from "@/components/UI/Modal.vue";
 import Button from "@/components/UI/Button.vue";
 import Badge from "@/components/UI/Badge.vue";
 import Card from "@/components/UI/Card.vue";
+import { t } from "@/i18n";
 
 const props = defineProps({
     open: {
@@ -60,9 +62,9 @@ function startEditing() {
         ? record.value.Partner_Type.join(", ")
         : record.value.Partner_Type || "";
     editForm.Name_of_Funder = record.value.Name_of_Funder || "";
-    editForm.Program_Area = Array.isArray(record.value.Program_Area)
-        ? record.value.Program_Area.join(", ")
-        : record.value.Program_Area || "";
+    editForm.Program_Area = (record.value.Program_Area && typeof record.value.Program_Area === 'object' && !Array.isArray(record.value.Program_Area))
+        ? JSON.parse(JSON.stringify(record.value.Program_Area))
+        : record.value.Program_Area || {};
     editForm.Nature_of_Support = Array.isArray(record.value.Nature_of_Support)
         ? record.value.Nature_of_Support.join(", ")
         : record.value.Nature_of_Support || "";
@@ -92,10 +94,7 @@ async function saveChanges() {
                 .map(s => s.trim())
                 .filter(Boolean),
             Name_of_Funder: editForm.Name_of_Funder,
-            Program_Area: editForm.Program_Area
-                .split(",")
-                .map(s => s.trim())
-                .filter(Boolean),
+            Program_Area: editForm.Program_Area,
             Nature_of_Support: editForm.Nature_of_Support
                 .split(",")
                 .map(s => s.trim())
@@ -110,10 +109,10 @@ async function saveChanges() {
         const updated = await updateRecord("prmt_data", record.value.id, data);
         record.value = updated;
         isEditing.value = false;
-        showSuccess("Record updated successfully");
+        showSuccess(t("success.recordUpdated"));
         emit("updated");
     } catch (error) {
-        showError("Failed to update record");
+        showError(t("success.updateFailed"));
     }
 }
 
@@ -125,10 +124,10 @@ async function handleToggleApprove() {
             approve: !record.value.approve,
         });
         record.value = updated;
-        showSuccess("Record status updated successfully");
+        showSuccess(t("success.recordStatusUpdated"));
         emit("updated");
     } catch (error) {
-        showError("Failed to update record status");
+        showError(t("success.statusUpdateFailed"));
     }
 }
 
@@ -140,20 +139,20 @@ function handleClose() {
 </script>
 
 <template>
-    <Modal :open="open" title="Record Details" size="lg" @close="handleClose">
+    <Modal :open="open" :title="t('modal.recordDetails')" size="lg" @close="handleClose">
         <template #footer>
-            <Button variant="ghost" @click="handleClose"> Close </Button>
+            <Button variant="ghost" @click="handleClose"> {{ t("modal.close") }} </Button>
             <Button
                 v-if="isSuperAdmin && record && !isEditing"
                 variant="outline-primary"
                 @click="startEditing"
             >
-                Edit
+                {{ t("modal.edit") }}
             </Button>
             <template v-if="isEditing">
-                <Button variant="ghost" @click="cancelEditing"> Cancel </Button>
+                <Button variant="ghost" @click="cancelEditing"> {{ t("modal.cancel") }} </Button>
                 <Button variant="primary" :loading="loading" @click="saveChanges">
-                    Save Changes
+                    {{ t("modal.saveChanges") }}
                 </Button>
             </template>
             <Button
@@ -162,7 +161,7 @@ function handleClose() {
                 :variant="record.approve ? 'danger' : 'primary'"
                 :loading="loading"
             >
-                {{ record.approve ? "Unapprove" : "Approve" }}
+                {{ record.approve ? t("modal.unapprove") : t("modal.approve") }}
             </Button>
         </template>
 
@@ -171,7 +170,7 @@ function handleClose() {
             <div
                 class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"
             ></div>
-            <p class="mt-4 text-gray-600">Loading record details...</p>
+            <p class="mt-4 text-gray-600">{{ t("modal.loadingRecord") }}</p>
         </div>
 
         <!-- Edit Mode -->
@@ -182,27 +181,27 @@ function handleClose() {
                     <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                         <span class="text-sm">&#127970;</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-secondary">Partner Information</h3>
+                    <h3 class="text-lg font-semibold text-secondary">{{ t("sections.partnerInformation") }}</h3>
                 </div>
                 <Card variant="bordered" padding="lg">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Partner Name</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.partnerName") }}</label>
                             <input v-model="editForm.Partner_Name" type="text"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Partner Type (comma separated)</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.partnerTypeHint") }}</label>
                             <input v-model="editForm.Partner_Type" type="text"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Email Address</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.emailAddress") }}</label>
                             <input v-model="editForm.Email" type="email"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Phone Number</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.phoneNumber") }}</label>
                             <input v-model="editForm.Phone_number" type="text"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
                         </div>
@@ -216,37 +215,41 @@ function handleClose() {
                     <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
                         <span class="text-sm">&#128188;</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-secondary">Support Details</h3>
+                    <h3 class="text-lg font-semibold text-secondary">{{ t("sections.supportDetails") }}</h3>
                 </div>
                 <Card variant="bordered" padding="lg">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Funding Organization</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.fundingOrganization") }}</label>
                             <input v-model="editForm.Name_of_Funder" type="text"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
                         </div>
-                        <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Program Areas (comma separated)</label>
-                            <input v-model="editForm.Program_Area" type="text"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
+                        <div class="md:col-span-2 space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.programAreas") }}</label>
+                            <ProgramAreaTree
+                                v-if="editForm.Program_Area && typeof editForm.Program_Area === 'object' && !Array.isArray(editForm.Program_Area)"
+                                v-model="editForm.Program_Area"
+                                :readonly="false"
+                            />
+                            <span v-else class="text-sm text-gray-400 italic">No program area data</span>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Nature of Support (comma separated)</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.natureOfSupportHint") }}</label>
                             <input v-model="editForm.Nature_of_Support" type="text"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Start Date</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.startDate") }}</label>
                             <input v-model="editForm.Start_date_of_support" type="date"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">End Date</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.endDate") }}</label>
                             <input v-model="editForm.End_date_of_support" type="date"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
                         </div>
                         <div class="md:col-span-2 space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Summary of Support</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.summaryOfSupport") }}</label>
                             <textarea v-model="editForm.Summary_of_support" rows="4"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm"></textarea>
                         </div>
@@ -260,11 +263,11 @@ function handleClose() {
                     <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
                         <span class="text-sm">&#128100;</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-secondary">Contact Information</h3>
+                    <h3 class="text-lg font-semibold text-secondary">{{ t("sections.contactInformation") }}</h3>
                 </div>
                 <Card variant="bordered" padding="lg">
                     <div class="space-y-1">
-                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Organization Focal Person</label>
+                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.orgFocalPerson") }}</label>
                         <input v-model="editForm.Organization_focal_person" type="text"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm" />
                     </div>
@@ -295,7 +298,7 @@ function handleClose() {
                             }}</span>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Approval Status</p>
+                            <p class="text-sm text-gray-500">{{ t("modal.approvalStatus") }}</p>
                             <Badge
                                 :variant="
                                     record.approve ? 'success' : 'warning'
@@ -305,8 +308,8 @@ function handleClose() {
                             >
                                 {{
                                     record.approve
-                                        ? "Approved"
-                                        : "Pending Review"
+                                        ? t("modal.approved")
+                                        : t("modal.pendingReview")
                                 }}
                             </Badge>
                         </div>
@@ -323,19 +326,19 @@ function handleClose() {
                         <span class="text-sm">&#127970;</span>
                     </div>
                     <h3 class="text-lg font-semibold text-secondary">
-                        Partner Information
+                        {{ t("sections.partnerInformation") }}
                     </h3>
                 </div>
                 <Card variant="bordered" padding="lg">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Partner Name</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.partnerNameView") }}</label>
                             <p class="font-semibold text-gray-900">
-                                {{ record.Partner_Name || "N/A" }}
+                                {{ record.Partner_Name || t("app.na") }}
                             </p>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Partner Type</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.partnerType") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
                                     v-for="(type, index) in formatArray(record.Partner_Type)"
@@ -347,19 +350,19 @@ function handleClose() {
                                 <span
                                     v-if="!record.Partner_Type || record.Partner_Type.length === 0"
                                     class="text-gray-400"
-                                >N/A</span>
+                                >{{ t("app.na") }}</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Email Address</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.emailAddress") }}</label>
                             <p class="font-medium text-gray-900">
-                                {{ record.Email || "N/A" }}
+                                {{ record.Email || t("app.na") }}
                             </p>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Phone Number</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.phoneNumber") }}</label>
                             <p class="font-medium text-gray-900">
-                                {{ record.Phone_number || "N/A" }}
+                                {{ record.Phone_number || t("app.na") }}
                             </p>
                         </div>
                     </div>
@@ -372,34 +375,29 @@ function handleClose() {
                     <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
                         <span class="text-sm">&#128188;</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-secondary">Support Details</h3>
+                    <h3 class="text-lg font-semibold text-secondary">{{ t("sections.supportDetails") }}</h3>
                 </div>
                 <Card variant="bordered" padding="lg">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Funding Organization</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.fundingOrganization") }}</label>
                             <p class="font-medium text-gray-900">
-                                {{ record.Name_of_Funder || "N/A" }}
+                                {{ record.Name_of_Funder || t("app.na") }}
                             </p>
                         </div>
-                        <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Program Areas</label>
-                            <div class="flex flex-wrap gap-1.5 mt-1">
-                                <span
-                                    v-for="(area, index) in formatArray(record.Program_Area)"
-                                    :key="index"
-                                    class="px-2.5 py-1 bg-green-50 text-green-700 rounded-md text-sm font-medium border border-green-100"
-                                >
-                                    {{ area }}
-                                </span>
-                                <span
-                                    v-if="!record.Program_Area || record.Program_Area.length === 0"
-                                    class="text-gray-400"
-                                >N/A</span>
+                        <div class="md:col-span-2 space-y-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.programAreas") }}</label>
+                            <div class="mt-1">
+                                <ProgramAreaTree
+                                    v-if="record.Program_Area && typeof record.Program_Area === 'object' && !Array.isArray(record.Program_Area)"
+                                    :modelValue="record.Program_Area"
+                                    readonly
+                                />
+                                <span v-else class="text-gray-400">{{ t("app.na") }}</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Nature of Support</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.natureOfSupport") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
                                     v-for="(support, index) in formatArray(record.Nature_of_Support)"
@@ -411,25 +409,25 @@ function handleClose() {
                                 <span
                                     v-if="!record.Nature_of_Support || record.Nature_of_Support.length === 0"
                                     class="text-gray-400"
-                                >N/A</span>
+                                >{{ t("app.na") }}</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Start Date</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.startDate") }}</label>
                             <p class="font-medium text-gray-900">
                                 {{ formatDate(record.Start_date_of_support) }}
                             </p>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">End Date</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.endDate") }}</label>
                             <p class="font-medium text-gray-900">
                                 {{ formatDate(record.End_date_of_support) }}
                             </p>
                         </div>
                         <div class="md:col-span-2 space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Summary of Support</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.summaryOfSupport") }}</label>
                             <p class="font-medium text-gray-900 leading-relaxed">
-                                {{ record.Summary_of_support || "N/A" }}
+                                {{ record.Summary_of_support || t("app.na") }}
                             </p>
                         </div>
                     </div>
@@ -442,12 +440,12 @@ function handleClose() {
                     <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                         <span class="text-sm">&#128506;</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-secondary">Geographic Coverage</h3>
+                    <h3 class="text-lg font-semibold text-secondary">{{ t("sections.geographicCoverage") }}</h3>
                 </div>
                 <Card variant="bordered" padding="lg">
                     <div class="grid grid-cols-1 gap-4">
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Province(s)</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.provinces") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
                                     v-for="(state, index) in (record.state_names || [])"
@@ -459,11 +457,11 @@ function handleClose() {
                                 <span
                                     v-if="!record.state_names || record.state_names.length === 0"
                                     class="text-gray-400"
-                                >N/A</span>
+                                >{{ t("app.na") }}</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Territories</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.territories") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
                                      v-for="(lga, index) in extractFromArray(record.lga_data, 'territory')"
@@ -475,11 +473,11 @@ function handleClose() {
                                 <span
                                     v-if="!record.lga_data || record.lga_data.length === 0"
                                     class="text-gray-400"
-                                >N/A</span>
+                                >{{ t("app.na") }}</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Chiefdoms</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.chiefdoms") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
                                      v-for="(ward, index) in extractFromArray(record.ward_data, 'chiefdom')"
@@ -491,11 +489,11 @@ function handleClose() {
                                 <span
                                     v-if="!record.ward_data || record.ward_data.length === 0"
                                     class="text-gray-400"
-                                >N/A</span>
+                                >{{ t("app.na") }}</span>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Facilities</label>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.facilities") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
                                     v-for="(facility, index) in extractFromArray(record.facility_data, 'facility')"
@@ -507,7 +505,7 @@ function handleClose() {
                                 <span
                                     v-if="!record.facility_data || record.facility_data.length === 0"
                                     class="text-gray-400"
-                                >N/A</span>
+                                >{{ t("app.na") }}</span>
                             </div>
                         </div>
                     </div>
@@ -520,13 +518,13 @@ function handleClose() {
                     <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
                         <span class="text-sm">&#128100;</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-secondary">Contact Information</h3>
+                    <h3 class="text-lg font-semibold text-secondary">{{ t("sections.contactInformation") }}</h3>
                 </div>
                 <Card variant="bordered" padding="lg">
                     <div class="space-y-1">
-                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Organization Focal Person</label>
+                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.orgFocalPerson") }}</label>
                         <p class="font-medium text-gray-900">
-                            {{ record.Organization_focal_person || "N/A" }}
+                            {{ record.Organization_focal_person || t("app.na") }}
                         </p>
                     </div>
                 </Card>
@@ -536,7 +534,7 @@ function handleClose() {
         <!-- No Data State -->
         <div v-else class="text-center py-12">
             <div class="text-5xl mb-4">&#128237;</div>
-            <p class="text-gray-500 font-medium">No record data available</p>
+            <p class="text-gray-500 font-medium">{{ t("modal.noRecord") }}</p>
         </div>
     </Modal>
 </template>
