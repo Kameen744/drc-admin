@@ -7,6 +7,7 @@ import Button from "@/components/UI/Button.vue";
 import { usePocketBase } from "@/composables/usePocketBase";
 import { useAuthStore } from "@/stores/auth";
 import { storeToRefs } from "pinia";
+import { t } from "@/i18n";
 
 const authStore = useAuthStore();
 const { isStateAdmin, assignedState } = storeToRefs(authStore);
@@ -96,7 +97,7 @@ async function fetchSubmissions() {
         const filter = buildFilter();
         const sort = filters.value.sortColumn
             ? `${filters.value.sortDirection === "asc" ? "" : "-"}${filters.value.sortColumn}`
-            : "";
+            : "-created";
 
         const result = await fetchRecords("prmt_data_view", {
             page: pagination.value.page,
@@ -111,7 +112,7 @@ async function fetchSubmissions() {
     } catch (err) {
         console.error("Error fetching submissions:", err);
         error.value =
-            err.message || "Failed to load submissions. Please try again.";
+            err.message || t("submissions.failedLoad");
         records.value = [];
     } finally {
         loading.value = false;
@@ -159,7 +160,7 @@ onMounted(async () => {
         await fetchSubmissions();
     } catch (err) {
         console.error("Error during initial load:", err);
-        error.value = "Failed to load initial data. Please refresh the page.";
+        error.value = t("submissions.failedInitial");
     }
 });
 </script>
@@ -168,9 +169,9 @@ onMounted(async () => {
     <div class="space-y-6">
         <!-- Page Header -->
         <div>
-            <h1 class="text-2xl font-bold text-secondary">PRMT Submissions</h1>
+            <h1 class="text-2xl font-bold text-secondary">{{ t("submissions.title") }}</h1>
             <p class="text-gray-600 mt-1">
-                View and manage PRMT data submissions
+                {{ t("submissions.description") }}
             </p>
         </div>
 
@@ -179,7 +180,7 @@ onMounted(async () => {
             <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span class="text-sm text-blue-700">Viewing submissions for <strong>{{ lockedState }}</strong> only</span>
+            <span class="text-sm text-blue-700">{{ t("submissions.viewingFor") }} <strong>{{ lockedState }}</strong> {{ t("submissions.only") }}</span>
         </div>
 
         <!-- Stats Cards -->
@@ -190,7 +191,7 @@ onMounted(async () => {
                         <span class="text-2xl">📊</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 font-medium">Total Submissions</p>
+                        <p class="text-sm text-gray-500 font-medium">{{ t("submissions.totalSubmissions") }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ pagination.totalItems }}</p>
                     </div>
                 </div>
@@ -202,7 +203,7 @@ onMounted(async () => {
                         <span class="text-2xl">✅</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 font-medium">Approved</p>
+                        <p class="text-sm text-gray-500 font-medium">{{ t("submissions.approved") }}</p>
                         <p class="text-2xl font-bold text-green-600">{{ stats.approved }}</p>
                     </div>
                 </div>
@@ -214,7 +215,7 @@ onMounted(async () => {
                         <span class="text-2xl">⏳</span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 font-medium">Pending</p>
+                        <p class="text-sm text-gray-500 font-medium">{{ t("submissions.pending") }}</p>
                         <p class="text-2xl font-bold text-yellow-600">{{ stats.pending }}</p>
                     </div>
                 </div>
@@ -226,7 +227,7 @@ onMounted(async () => {
                         <span class="text-2xl">🗺️</span>
                     </div>
                     <div>
-                         <p class="text-sm text-gray-500 font-medium">Provinces Covered</p>
+                         <p class="text-sm text-gray-500 font-medium">{{ t("submissions.provincesCovered") }}</p>
                         <p class="text-2xl font-bold text-blue-600">{{ stats.uniqueStates }}</p>
                     </div>
                 </div>
@@ -252,11 +253,11 @@ onMounted(async () => {
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <h3 class="font-semibold text-red-900">Error Loading Data</h3>
+                        <h3 class="font-semibold text-red-900">{{ t("submissions.errorTitle") }}</h3>
                         <p class="text-red-700 mt-1">{{ error }}</p>
                         <Button @click="retryFetch" variant="danger" size="sm" class="mt-3">
                             <span>🔄</span>
-                            Retry
+                            {{ t("submissions.retry") }}
                         </Button>
                     </div>
                 </div>
