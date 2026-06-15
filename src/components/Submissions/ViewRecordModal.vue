@@ -2,7 +2,7 @@
 import { ref, watch, reactive } from "vue";
 import { usePocketBase } from "@/composables/usePocketBase";
 import { useToast } from "@/composables/useToast";
-import { formatDate, formatArray, extractFromArray, extractProgramAreaNames } from "@/utils/helpers";
+import { formatDate, formatArray, extractFromArray } from "@/utils/helpers";
 import ProgramAreaTree from "@/components/Submissions/ProgramAreaTree.vue";
 import { useAuthStore } from "@/stores/auth";
 import { storeToRefs } from "pinia";
