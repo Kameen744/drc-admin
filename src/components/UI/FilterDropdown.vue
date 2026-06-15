@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { t } from '@/i18n'
 
 const props = defineProps({
   label: {
@@ -16,7 +17,7 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: 'Select...'
+    default: ''
   },
   size: {
     type: String,
@@ -45,7 +46,7 @@ watch(() => props.modelValue, (newValue) => {
 
 const displayValue = computed(() => {
   const option = props.options.find(opt => opt.value === localValue.value)
-  return option ? option.label : props.placeholder
+  return option ? option.label : (props.placeholder || t('filter.select'))
 })
 
 const sizes = {

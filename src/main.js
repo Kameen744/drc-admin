@@ -6,10 +6,12 @@ import Toast from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 import pb, { initPocketBase } from './lib/pocketbase'
 import { useAuthStore } from './stores/auth'
+import { initI18n } from './i18n'
 
 import './index.css'
 
 initPocketBase()
+initI18n()
 
 const app = createApp(App)
 const pinia = createPinia()

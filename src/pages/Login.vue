@@ -4,6 +4,7 @@ import { ref } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useToast } from "@/composables/useToast";
 import LoginForm from "@/components/Auth/LoginForm.vue";
+import { t } from "@/i18n";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -18,13 +19,13 @@ async function handleLogin(credentials) {
             credentials.password,
         );
         if (result.success) {
-            showSuccess("Login successful! Welcome back.");
+            showSuccess(t("auth.success"));
             router.push("/submissions");
         } else {
-            showError(result.error || "Invalid email or password");
+            showError(result.error || t("auth.invalidCredentials"));
         }
     } catch (error) {
-        showError("Invalid email or password");
+        showError(t("auth.invalidCredentials"));
     } finally {
         loading.value = false;
     }
@@ -70,7 +71,7 @@ async function handleLogin(credentials) {
                             PRMT Admin
                         </h1> -->
                         <p class="text-white/80 text-sm">
-                            Partner Resource Management Tracker
+                            {{ t("auth.appName") }}
                         </p>
                     </div>
                 </div>
@@ -79,10 +80,10 @@ async function handleLogin(credentials) {
                 <div class="px-8 py-8">
                     <div class="mb-6 text-center">
                         <h2 class="text-xl font-semibold text-gray-900 mb-1">
-                            Welcome back
+                            {{ t("auth.welcomeBack") }}
                         </h2>
                         <p class="text-gray-500 text-sm">
-                            Sign in to access your dashboard
+                            {{ t("auth.signIn") }}
                         </p>
                     </div>
 
@@ -122,7 +123,7 @@ async function handleLogin(credentials) {
                                     ></path>
                                 </svg>
                                 <span class="text-sm font-medium"
-                                    >Signing in...</span
+                                    >{{ t("auth.signingIn") }}</span
                                 >
                             </div>
                         </div>
@@ -141,7 +142,7 @@ async function handleLogin(credentials) {
 
             <!-- Help text -->
             <p class="mt-6 text-center text-sm text-gray-500">
-                Need help? Contact your system administrator
+                {{ t("auth.helpText") }}
             </p>
         </div>
     </div>

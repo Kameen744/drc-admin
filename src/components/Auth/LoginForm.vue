@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import Input from '@/components/UI/Input.vue'
 import Button from '@/components/UI/Button.vue'
+import { t } from '@/i18n'
 
 const emit = defineEmits(['submit'])
 
@@ -22,15 +23,15 @@ function validate() {
   let isValid = true
 
   if (!email.value) {
-    emailError.value = 'Email is required'
+    emailError.value = t("auth.emailRequired")
     isValid = false
   } else if (!validateEmail(email.value)) {
-    emailError.value = 'Please enter a valid email'
+    emailError.value = t("auth.validEmail")
     isValid = false
   }
 
   if (!password.value) {
-    passwordError.value = 'Password is required'
+    passwordError.value = t("auth.passwordRequired")
     isValid = false
   }
 
@@ -49,21 +50,21 @@ function handleSubmit() {
     <Input
       v-model="email"
       type="email"
-      label="Email"
-      placeholder="Enter your email"
+      :label="t('auth.email.label')"
+      :placeholder="t('auth.email.placeholder')"
       :error="emailError"
       required
     />
     <Input
       v-model="password"
       type="password"
-      label="Password"
-      placeholder="Enter your password"
+      :label="t('auth.password.label')"
+      :placeholder="t('auth.password.placeholder')"
       :error="passwordError"
       required
     />
     <Button type="submit" variant="primary" class="w-full">
-      Login
+      {{ t("auth.login") }}
     </Button>
   </form>
 </template>

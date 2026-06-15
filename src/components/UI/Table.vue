@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { t } from '@/i18n'
 
 const props = defineProps({
   columns: {
@@ -125,8 +126,8 @@ function getSortIcon(column) {
             <td :colspan="columns.length" class="px-6 py-12">
               <div class="text-center">
                 <div class="text-5xl mb-3">📭</div>
-                <p class="text-gray-500 font-medium">No records found</p>
-                <p class="text-gray-400 text-sm mt-1">Try adjusting your filters or search query</p>
+                <p class="text-gray-500 font-medium">{{ t("table.noRecords") }}</p>
+                <p class="text-gray-400 text-sm mt-1">{{ t("table.noRecordsHint") }}</p>
               </div>
             </td>
           </tr>

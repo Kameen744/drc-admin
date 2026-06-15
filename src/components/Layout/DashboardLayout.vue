@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useToast } from "@/composables/useToast";
 import Button from "@/components/UI/Button.vue";
 import { ref, computed } from "vue";
+import { t, setLang, getLang } from "@/i18n";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -12,22 +13,27 @@ const mobileMenuOpen = ref(false);
 
 async function handleLogout() {
     await authStore.logout();
-    showSuccess("Logged out successfully");
+    showSuccess(t("app.loggedOut"));
     router.push("/login");
 }
 
 const navigation = [
     {
-        name: "Submissions",
+        nameKey: "nav.submissions",
+        descKey: "nav.submissionsDesc",
         href: "/submissions",
         icon: "📋",
-        description: "View and manage partner submissions",
     },
 ];
 
 const currentPageTitle = computed(() => {
-    return router.currentRoute.value.meta.title || "Dashboard";
+    const titleKey = router.currentRoute.value.meta.titleKey;
+    return titleKey ? t(titleKey) : t("app.dashboard");
 });
+
+function switchLang(lang) {
+    setLang(lang);
+}
 </script>
 
 <template>
@@ -55,7 +61,7 @@ const currentPageTitle = computed(() => {
                 <nav class="flex-1 mt-4 px-3 space-y-1 overflow-y-auto">
                     <router-link
                         v-for="item in navigation"
-                        :key="item.name"
+                        :key="item.nameKey"
                         :to="item.href"
                         @click="mobileMenuOpen = false"
                         class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group"
@@ -71,12 +77,12 @@ const currentPageTitle = computed(() => {
                             >{{ item.icon }}</span
                         >
                         <div class="flex-1">
-                            <p class="font-medium">{{ item.name }}</p>
+                            <p class="font-medium">{{ t(item.nameKey) }}</p>
                             <p
-                                v-if="item.description"
+                                v-if="item.descKey"
                                 class="text-xs text-white/60 mt-0.5"
                             >
-                                {{ item.description }}
+                                {{ t(item.descKey) }}
                             </p>
                         </div>
                         <div
@@ -86,12 +92,31 @@ const currentPageTitle = computed(() => {
                     </router-link>
                 </nav>
 
+                <!-- Language switcher -->
+                <div class="px-4 py-2 border-t border-white/10">
+                    <div class="flex items-center justify-center gap-1 bg-white/5 rounded-lg p-1">
+                        <button
+                            type="button"
+                            @click="switchLang('fr')"
+                            class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+                            :class="getLang() === 'fr' ? 'bg-primary text-white' : 'text-white/70 hover:text-white hover:bg-white/10'"
+                        >FR</button>
+                        <span class="text-white/30">|</span>
+                        <button
+                            type="button"
+                            @click="switchLang('en')"
+                            class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+                            :class="getLang() === 'en' ? 'bg-primary text-white' : 'text-white/70 hover:text-white hover:bg-white/10'"
+                        >EN</button>
+                    </div>
+                </div>
+
                 <!-- User info & logout -->
                 <div class="p-4 border-t border-white/10 space-y-3">
                     <div class="px-3 py-2 bg-white/5 rounded-lg">
-                        <p class="text-xs text-white/60 mb-1">Signed in as</p>
+                        <p class="text-xs text-white/60 mb-1">{{ t("app.signedInAs") }}</p>
                         <p class="text-sm font-medium truncate">
-                            {{ authStore.user?.email || "User" }}
+                            {{ authStore.user?.email || t("app.user") }}
                         </p>
                     </div>
                     <Button
@@ -101,7 +126,7 @@ const currentPageTitle = computed(() => {
                         class="w-full"
                     >
                         <span>🚪</span>
-                        Logout
+                        {{ t("app.logout") }}
                     </Button>
                 </div>
             </aside>
@@ -153,7 +178,7 @@ const currentPageTitle = computed(() => {
                             <div class="hidden sm:block text-right">
                                 <p class="text-sm text-gray-500">
                                     {{
-                                        new Date().toLocaleDateString("en-US", {
+                                        new Date().toLocaleDateString(getLang() === "fr" ? "fr-FR" : "en-US", {
                                             weekday: "long",
                                             year: "numeric",
                                             month: "long",

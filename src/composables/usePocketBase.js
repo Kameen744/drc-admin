@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import pb from '@/lib/pocketbase'
 import { useToast } from './useToast'
+import { t } from '@/i18n'
 
 export function usePocketBase() {
   const { showError } = useToast()
@@ -19,7 +20,7 @@ export function usePocketBase() {
       return result
     } catch (err) {
       error.value = err.message
-      showError('Failed to load data. Please try again')
+      showError(t('error.loadData'))
       throw err
     } finally {
       loading.value = false
@@ -34,7 +35,7 @@ export function usePocketBase() {
       return result
     } catch (err) {
       error.value = err.message
-      showError('Failed to update record. Please try again')
+      showError(t('error.updateRecord'))
       throw err
     } finally {
       loading.value = false
@@ -51,7 +52,7 @@ export function usePocketBase() {
       return result
     } catch (err) {
       error.value = err.message
-      showError('Failed to load record. Please try again')
+      showError(t('error.loadRecord'))
       throw err
     } finally {
       loading.value = false

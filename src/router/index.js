@@ -17,7 +17,7 @@ const routes = [
         path: '',
         name: 'Submissions',
         component: () => import('@/pages/Submissions.vue'),
-        meta: { title: 'Submissions' }
+        meta: { titleKey: 'nav.submissions' }
       }
     ]
   },
