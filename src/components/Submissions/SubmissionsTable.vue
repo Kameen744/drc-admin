@@ -222,7 +222,7 @@ const hasActiveFilters = computed(() => {
                 <span class="text-gray-700 truncate block" :title="row.Name_of_Funder">{{ row.Name_of_Funder }}</span>
             </template>
             <template #Program_Area="{ row }">
-                <div v-if="row.Program_Area && typeof row.Program_Area === 'object' && !Array.isArray(row.Program_Area)" class="flex flex-wrap gap-1 items-center">
+                <div v-if="row.Program_Area && typeof row.Program_Area === 'object' && !Array.isArray(row.Program_Area) && extractProgramAreaNames(row.Program_Area).length" class="flex flex-wrap gap-1 items-center">
                     <span
                         v-for="(area, index) in extractProgramAreaNames(row.Program_Area).slice(0, 2)"
                         :key="index"
