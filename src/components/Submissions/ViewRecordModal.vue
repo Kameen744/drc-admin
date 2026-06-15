@@ -380,12 +380,6 @@ function handleClose() {
                 <Card variant="bordered" padding="lg" class="shadow-sm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
-                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.fundingOrganization") }}</label>
-                            <p class="font-medium text-gray-900">
-                                {{ record.Name_of_Funder || t("app.na") }}
-                            </p>
-                        </div>
-                        <div class="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-0.5">
                             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t("fields.natureOfSupport") }}</label>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span
