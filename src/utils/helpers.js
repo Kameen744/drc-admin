@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import { t } from '@/i18n'
 
 export function formatDate(dateString) {
   if (!dateString) return 'N/A'
@@ -38,5 +39,20 @@ export function getBadgeClass(status) {
 }
 
 export function getStatusText(status) {
-  return status ? 'Approved' : 'Pending'
+  return status ? t('table.approved') : t('table.pending')
+}
+
+export function extractProgramAreaNames(obj) {
+  if (!obj || typeof obj !== 'object') return []
+  return Object.keys(obj).filter(k => k !== '_funding')
+}
+
+export function formatCurrency(amount) {
+  if (amount == null || isNaN(Number(amount))) return 'N/A'
+  return '$' + Number(amount).toLocaleString()
+}
+
+export function calculateFundingProgress(funding) {
+  if (!funding || !funding.amount || !funding.disbursed) return 0
+  return Math.min(100, Math.round((funding.disbursed / funding.amount) * 100))
 }
